@@ -10,7 +10,20 @@ namespace Cinema.DAL
 {
     public class DataProvider
     {
+        static string ConnectString = @"Data Source=NHN\SQLEXPRESS;Initial Catalog=DatVeXemPhim1;Integrated Security=True";
+        static public SqlConnection Connection = new SqlConnection(ConnectString);
+        static public SqlCommand Command = null;
+        public static void OpenConnection()
+        {
+            Connection.Open();
+        }
+        public static void CloseConnection()
+        {
+            Connection.Close();
+        }
+
         private static DataProvider instance; // Ctrl + R + E
+        private DataProvider() { }
 
         public static DataProvider Instance
         {
@@ -18,104 +31,82 @@ namespace Cinema.DAL
             private set { DataProvider.instance = value; }
         }
 
-        private DataProvider() { }
-
-        private string connectionSTR = "Data Source=DESKTOP-ON0HB0P\\MSSQLSERVER_1;Initial Catalog=DatVeXemPhim1;Integrated Security=True";
 
         public DataTable ExecuteQuery(string query, object[] parameter = null)
         {
+            OpenConnection();
             DataTable data = new DataTable();
+            SqlCommand command = new SqlCommand(query, Connection);
 
-            using (SqlConnection connection = new SqlConnection(connectionSTR))
+            if (parameter != null)
             {
-                connection.Open();
-
-                SqlCommand command = new SqlCommand(query, connection);
-
-                if (parameter != null)
+                string[] listPara = query.Split(' ');
+                int i = 0;
+                foreach (string item in listPara)
                 {
-                    string[] listPara = query.Split(' ');
-                    int i = 0;
-                    foreach (string item in listPara)
+                    if (item.Contains('@'))
                     {
-                        if (item.Contains('@'))
-                        {
-                            command.Parameters.AddWithValue(item, parameter[i]);
-                            i++;
-                        }
+                        command.Parameters.AddWithValue(item, parameter[i]);
+                        i++;
                     }
                 }
-
-                SqlDataAdapter adapter = new SqlDataAdapter(command);
-
-                adapter.Fill(data);
-
-                connection.Close();
             }
+
+            SqlDataAdapter adapter = new SqlDataAdapter(command);
+            adapter.Fill(data);
+            CloseConnection();
 
             return data;
         }
 
         public int ExecuteNonQuery(string query, object[] parameter = null)
         {
+            OpenConnection();
+            SqlCommand command = new SqlCommand(query, Connection);
             int data = 0;
 
-            using (SqlConnection connection = new SqlConnection(connectionSTR))
+            if (parameter != null)
             {
-                connection.Open();
-
-                SqlCommand command = new SqlCommand(query, connection);
-
-                if (parameter != null)
+                string[] listPara = query.Split(' ');
+                int i = 0;
+                foreach (string item in listPara)
                 {
-                    string[] listPara = query.Split(' ');
-                    int i = 0;
-                    foreach (string item in listPara)
+                    if (item.Contains('@'))
                     {
-                        if (item.Contains('@'))
-                        {
-                            command.Parameters.AddWithValue(item, parameter[i]);
-                            i++;
-                        }
+                        command.Parameters.AddWithValue(item, parameter[i]);
+                        i++;
                     }
                 }
-
-                data = command.ExecuteNonQuery();
-
-                connection.Close();
             }
+
+            data = command.ExecuteNonQuery();
+            CloseConnection();
 
             return data;
         }
 
         public object ExecuteScalar(string query, object[] parameter = null)
         {
+            OpenConnection();
+            SqlCommand command = new SqlCommand(query, Connection);
             object data = 0;
 
-            using (SqlConnection connection = new SqlConnection(connectionSTR))
+            if (parameter != null)
             {
-                connection.Open();
-
-                SqlCommand command = new SqlCommand(query, connection);
-
-                if (parameter != null)
+                string[] listPara = query.Split(' ');
+                int i = 0;
+                foreach (string item in listPara)
                 {
-                    string[] listPara = query.Split(' ');
-                    int i = 0;
-                    foreach (string item in listPara)
+                    if (item.Contains('@'))
                     {
-                        if (item.Contains('@'))
-                        {
-                            command.Parameters.AddWithValue(item, parameter[i]);
-                            i++;
-                        }
+                        command.Parameters.AddWithValue(item, parameter[i]);
+                        i++;
                     }
                 }
-
-                data = command.ExecuteScalar();
-
-                connection.Close();
             }
+
+            data = command.ExecuteScalar();
+            CloseConnection();
 
             return data;
         }
